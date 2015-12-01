@@ -1,6 +1,8 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.styleSelect = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 require('polyfill-function-prototype-bind');
 var MobileDetect = require('mobile-detect');
+var ClassList = require('classlist');
+
 var md = new MobileDetect(window.navigator.userAgent);
 
 var KEYCODES = {
@@ -190,7 +192,7 @@ module.exports = function(selector) {
 
 		var changeRealSelectBox = function(newValue, newLabel) {
 			// Close styledSelect
-			styledSelect.classList.remove('open');
+			ClassList(styledSelect).remove('open');
 
 			// Update styled value
 			selectedOption.textContent = newLabel;
@@ -199,9 +201,9 @@ module.exports = function(selector) {
 			// Update the 'tick' that shows the option with the current value
 			styleSelectOptions.forEach(function(styleSelectOption){
 				if ( styleSelectOption.dataset.value === newValue) {
-					styleSelectOption.classList.add('ticked')
+					ClassList(styleSelectOption).add('ticked')
 				} else {
-					styleSelectOption.classList.remove('ticked')
+					ClassList(styleSelectOption).remove('ticked')
 				}
 			});
 
@@ -235,30 +237,30 @@ module.exports = function(selector) {
 			// Tick and highlight the option that's currently in use
 			if ( styleSelectOption.dataset.value === realSelect.value ) {
 				highlightedOptionIndex = index;
-				styleSelectOption.classList.add('ticked');
-				styleSelectOption.classList.add('highlighted')
+				ClassList(styleSelectOption).add('ticked');
+				ClassList(styleSelectOption).add('highlighted')
 			}
 
 			// Important: we can't use ':hover' as the keyboard and default value can also set the highlight
 			styleSelectOption.addEventListener('mouseover', function(ev){
 				styleSelectOption.parentNode.childNodes.forEach(function(sibling, index){
 					if ( sibling === ev.target ) {
-						sibling.classList.add('highlighted');
+						ClassList(sibling).add('highlighted');
 						highlightedOptionIndex = index;
 					} else {
-						sibling.classList.remove('highlighted')
+						ClassList(sibling).remove('highlighted')
 					}
 				})
 			})
 		});
 
 		var toggleStyledSelect = function(styledSelectBox){
-			if ( ! styledSelectBox.classList.contains('open') ) {
+			if ( ! ClassList(styledSelectBox).contains('open') ) {
 				// If we're closed and about to open, close other style selects on the page
 				closeAllStyleSelects(styledSelectBox);
 			}
 			// Then toggle open/close
-			styledSelectBox.classList.toggle('open');
+			ClassList(styledSelectBox).toggle('open');
 		};
 
 		// When a styled select box is clicked
@@ -281,7 +283,7 @@ module.exports = function(selector) {
 				case KEYCODES.DOWN:
 				case KEYCODES.UP:
 					// Move the highlight up and down
-					if ( ! styledSelectBox.classList.contains('open') ) {
+					if ( ! ClassList(styledSelectBox).contains('open') ) {
 						// If style select is not open, up/down should open it.
 						toggleStyledSelect(styledSelectBox);
 					} else {
@@ -299,9 +301,9 @@ module.exports = function(selector) {
 						}
 						styleSelectOptions.forEach(function(option, index){
 							if ( index === highlightedOptionIndex ) {
-								option.classList.add('highlighted')
+								ClassList(option).add('highlighted')
 							} else {
-								option.classList.remove('highlighted')
+								ClassList(option).remove('highlighted')
 							}
 						})
 					}
@@ -325,7 +327,7 @@ module.exports = function(selector) {
   var closeAllStyleSelects = function(exception){
     document.querySelectorAll('.style-select').forEach(function(styleSelectEl) {
       if ( styleSelectEl !== exception ) {
-        styleSelectEl.classList.remove('open');
+        ClassList(styleSelectEl).remove('open');
       }
     });
   };
@@ -339,7 +341,151 @@ module.exports = function(selector) {
 	})
 };
 
-},{"mobile-detect":2,"polyfill-function-prototype-bind":3}],2:[function(require,module,exports){
+},{"classlist":2,"mobile-detect":5,"polyfill-function-prototype-bind":6}],2:[function(require,module,exports){
+'use strict';
+
+module.exports = ClassList
+
+var indexOf = require('component-indexof'),
+    trim = require('trim'),
+    arr = Array.prototype
+
+/**
+ * ClassList(elem) is kind of like Element#classList.
+ *
+ * @param {Element} elem
+ * @return {ClassList}
+ */
+function ClassList (elem) {
+  if (!(this instanceof ClassList))
+    return new ClassList(elem)
+
+  var classes = trim(elem.className).split(/\s+/),
+      i
+
+  this._elem = elem
+
+  this.length = 0
+
+  for (i = 0; i < classes.length; i += 1) {
+    if (classes[i])
+      arr.push.call(this, classes[i])
+  }
+}
+
+/**
+ * add(class1 [, class2 [, ...]]) adds the given class(es) to the
+ * element.
+ *
+ * @param {String} ...
+ * @return {Context}
+ */
+ClassList.prototype.add = function () {
+  var name,
+      i
+
+  for (i = 0; i < arguments.length; i += 1) {
+    name = '' + arguments[i]
+
+    if (indexOf(this, name) >= 0)
+      continue
+
+    arr.push.call(this, name)
+  }
+
+  this._elem.className = this.toString()
+
+  return this
+}
+
+/**
+ * remove(class1 [, class2 [, ...]]) removes the given class(es) from
+ * the element.
+ *
+ * @param {String} ...
+ * @return {Context}
+ */
+ClassList.prototype.remove = function () {
+  var index,
+      name,
+      i
+
+  for (i = 0; i < arguments.length; i += 1) {
+    name = '' + arguments[i]
+    index = indexOf(this, name)
+
+    if (index < 0) continue
+
+    arr.splice.call(this, index, 1)
+  }
+
+  this._elem.className = this.toString()
+
+  return this
+}
+
+/**
+ * contains(name) determines if the element has a given class.
+ *
+ * @param {String} name
+ * @return {Boolean}
+ */
+ClassList.prototype.contains = function (name) {
+  name += ''
+  return indexOf(this, name) >= 0
+}
+
+/**
+ * toggle(name [, force]) toggles a class. If force is a boolean,
+ * this method is basically just an alias for add/remove.
+ *
+ * @param {String} name
+ * @param {Boolean} force
+ * @return {Context}
+ */
+ClassList.prototype.toggle = function (name, force) {
+  name += ''
+
+  if (force === true) return this.add(name)
+  if (force === false) return this.remove(name)
+
+  return this[this.contains(name) ? 'remove' : 'add'](name)
+}
+
+/**
+ * toString() returns the className of the element.
+ *
+ * @return {String}
+ */
+ClassList.prototype.toString = function () {
+  return arr.join.call(this, ' ')
+}
+
+},{"component-indexof":3,"trim":4}],3:[function(require,module,exports){
+module.exports = function(arr, obj){
+  if (arr.indexOf) return arr.indexOf(obj);
+  for (var i = 0; i < arr.length; ++i) {
+    if (arr[i] === obj) return i;
+  }
+  return -1;
+};
+},{}],4:[function(require,module,exports){
+
+exports = module.exports = trim;
+
+function trim(str){
+  return str.replace(/^\s*|\s*$/g, '');
+}
+
+exports.left = function(str){
+  return str.replace(/^\s*/, '');
+};
+
+exports.right = function(str){
+  return str.replace(/\s*$/, '');
+};
+
+},{}],5:[function(require,module,exports){
 // THIS FILE IS GENERATED - DO NOT EDIT!
 /*global module:false, define:false*/
 
@@ -1312,7 +1458,7 @@ define(function () {
         throw new Error('unknown environment');
     }
 })());
-},{}],3:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 // Taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
 if (!Function.prototype.bind) {
   Function.prototype.bind = function (oThis) {

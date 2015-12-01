@@ -1,5 +1,7 @@
 require('polyfill-function-prototype-bind');
 var MobileDetect = require('mobile-detect');
+var ClassList = require('classlist');
+
 var md = new MobileDetect(window.navigator.userAgent);
 
 var KEYCODES = {
@@ -189,7 +191,7 @@ module.exports = function(selector) {
 
 		var changeRealSelectBox = function(newValue, newLabel) {
 			// Close styledSelect
-			styledSelect.classList.remove('open');
+			ClassList(styledSelect).remove('open');
 
 			// Update styled value
 			selectedOption.textContent = newLabel;
@@ -198,9 +200,9 @@ module.exports = function(selector) {
 			// Update the 'tick' that shows the option with the current value
 			styleSelectOptions.forEach(function(styleSelectOption){
 				if ( styleSelectOption.dataset.value === newValue) {
-					styleSelectOption.classList.add('ticked')
+					ClassList(styleSelectOption).add('ticked')
 				} else {
-					styleSelectOption.classList.remove('ticked')
+					ClassList(styleSelectOption).remove('ticked')
 				}
 			});
 
@@ -234,30 +236,30 @@ module.exports = function(selector) {
 			// Tick and highlight the option that's currently in use
 			if ( styleSelectOption.dataset.value === realSelect.value ) {
 				highlightedOptionIndex = index;
-				styleSelectOption.classList.add('ticked');
-				styleSelectOption.classList.add('highlighted')
+				ClassList(styleSelectOption).add('ticked');
+				ClassList(styleSelectOption).add('highlighted')
 			}
 
 			// Important: we can't use ':hover' as the keyboard and default value can also set the highlight
 			styleSelectOption.addEventListener('mouseover', function(ev){
 				styleSelectOption.parentNode.childNodes.forEach(function(sibling, index){
 					if ( sibling === ev.target ) {
-						sibling.classList.add('highlighted');
+						ClassList(sibling).add('highlighted');
 						highlightedOptionIndex = index;
 					} else {
-						sibling.classList.remove('highlighted')
+						ClassList(sibling).remove('highlighted')
 					}
 				})
 			})
 		});
 
 		var toggleStyledSelect = function(styledSelectBox){
-			if ( ! styledSelectBox.classList.contains('open') ) {
+			if ( ! ClassList(styledSelectBox).contains('open') ) {
 				// If we're closed and about to open, close other style selects on the page
 				closeAllStyleSelects(styledSelectBox);
 			}
 			// Then toggle open/close
-			styledSelectBox.classList.toggle('open');
+			ClassList(styledSelectBox).toggle('open');
 		};
 
 		// When a styled select box is clicked
@@ -280,7 +282,7 @@ module.exports = function(selector) {
 				case KEYCODES.DOWN:
 				case KEYCODES.UP:
 					// Move the highlight up and down
-					if ( ! styledSelectBox.classList.contains('open') ) {
+					if ( ! ClassList(styledSelectBox).contains('open') ) {
 						// If style select is not open, up/down should open it.
 						toggleStyledSelect(styledSelectBox);
 					} else {
@@ -298,9 +300,9 @@ module.exports = function(selector) {
 						}
 						styleSelectOptions.forEach(function(option, index){
 							if ( index === highlightedOptionIndex ) {
-								option.classList.add('highlighted')
+								ClassList(option).add('highlighted')
 							} else {
-								option.classList.remove('highlighted')
+								ClassList(option).remove('highlighted')
 							}
 						})
 					}
@@ -324,7 +326,7 @@ module.exports = function(selector) {
   var closeAllStyleSelects = function(exception){
     document.querySelectorAll('.style-select').forEach(function(styleSelectEl) {
       if ( styleSelectEl !== exception ) {
-        styleSelectEl.classList.remove('open');
+        ClassList(styleSelectEl).remove('open');
       }
     });
   };
