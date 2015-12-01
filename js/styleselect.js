@@ -1,3 +1,7 @@
+var MobileDetect = require('mobile-detect');
+
+var md = new MobileDetect(window.navigator.userAgent);
+
 var KEYCODES = {
 	SPACE: 32,
 	UP: 38,
@@ -132,8 +136,8 @@ var makeUUID = function(){
 module.exports = function(selector) {
 
 	// Use native selects (which pop up large native UIs to go through the options ) on iOS/Android
-	if ( navigator.userAgent.match( /iPad|iPhone|Android/i ) ) {
-		return
+	if ( md.mobile() ) {
+		return;
 	}
   var realSelects = document.querySelectorAll(selector);
 
