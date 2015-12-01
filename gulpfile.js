@@ -5,7 +5,9 @@ var gulp = require('gulp'),
   livereload = require('gulp-livereload'),
   nodemon = require('gulp-nodemon'),
   jshint = require('gulp-jshint'),
-  connect = require('gulp-connect');
+  connect = require('gulp-connect'),
+  browserify = require('browserify')
+  source     = require('vinyl-source-stream');
 
 var path = require('path');
 
@@ -28,13 +30,25 @@ gulp.task('sass', function () {
     .pipe( connect.reload() );
 });
 
+gulp.task('js', function() {
+  return browserify({
+    entries: './js/styleselect.js',
+    standalone: 'styleSelect'
+  })
+    .bundle()
+    .pipe(source('styleselect.js'))
+    .pipe(gulp.dest('./dist/'));
+});
+
 // The default task (called when you run `gulp`)
-gulp.task('default', function() {
-  gulp.run('sass');
+gulp.task('default', ['sass', 'js'], function() {
 
   // Watch files and run tasks if they change
   gulp.watch('./scss/**/*.*', function(event) {
     gulp.run('sass');
+  });
+  gulp.watch('./js/styleselect.js', function(event) {
+    gulp.run('js');
   });
 
   connect.server({
@@ -42,4 +56,3 @@ gulp.task('default', function() {
     livereload: true
   });
 });
-
