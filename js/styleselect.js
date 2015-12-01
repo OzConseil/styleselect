@@ -16,10 +16,6 @@
 }(this, function () {
 // End of UMD module
 
-	// Quick aliases and polyfills if needed
-	var query = document.querySelector.bind(document);
-	var queryAll = document.querySelectorAll.bind(document);
-
 	var KEYCODES = {
 		SPACE: 32,
 		UP: 38,
@@ -158,7 +154,7 @@
 			return
 		}
 
-		var realSelect = query(selector),
+		var realSelect = document.querySelector(selector),
 			realOptions = realSelect.children,
 			selectedIndex = realSelect.selectedIndex,
 			uuid = makeUUID(),
@@ -200,7 +196,7 @@
 		// And add out styled select just after the real select
 		realSelect.insertAdjacentHTML('afterend', styleSelectHTML);
 
-		var styledSelect = query('.style-select[data-ss-uuid="'+uuid+'"]');
+		var styledSelect = document.querySelector('.style-select[data-ss-uuid="'+uuid+'"]');
 		var styleSelectOptions = styledSelect.querySelectorAll('.ss-option');
 		var selectedOption = styledSelect.querySelector('.ss-selected-option');
 
@@ -271,7 +267,7 @@
 
 
 		var closeAllStyleSelects = function(exception){
-			queryAll('.style-select').forEach(function(styleSelectEl) {
+			document.querySelectorAll('.style-select').forEach(function(styleSelectEl) {
 				if ( styleSelectEl !== exception ) {
 					styleSelectEl.classList.remove('open');
 				}
@@ -288,7 +284,7 @@
 		};
 
 		// When a styled select box is clicked
-		var styledSelectedOption = query('.style-select[data-ss-uuid="' + uuid + '"] .ss-selected-option');
+		var styledSelectedOption = document.querySelector('.style-select[data-ss-uuid="' + uuid + '"] .ss-selected-option');
 		styledSelectedOption.addEventListener('click', function(ev) {
 			ev.preventDefault();
 			ev.stopPropagation();
@@ -348,7 +344,7 @@
 		});
 
 		// Clicking outside of the styled select box closes any open styled select boxes
-		query('body').addEventListener('click', function(ev){
+		document.querySelector('body').addEventListener('click', function(ev){
 
 			if ( ! isAncestorOf(ev.target, '.style-select', true) ) {
 				closeAllStyleSelects();
@@ -359,4 +355,3 @@
 
 // Close UMD module
 }));
-
