@@ -37,7 +37,8 @@ gulp.task('js', function() {
   })
     .bundle()
     .pipe(source('styleselect.js'))
-    .pipe(gulp.dest('./dist/'));
+    .pipe(gulp.dest('./dist/'))
+    .pipe( connect.reload() );
 });
 
 // The default task (called when you run `gulp`)
