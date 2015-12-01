@@ -1,5 +1,5 @@
+require('polyfill-function-prototype-bind');
 var MobileDetect = require('mobile-detect');
-
 var md = new MobileDetect(window.navigator.userAgent);
 
 var KEYCODES = {
