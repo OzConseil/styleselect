@@ -1,6 +1,6 @@
 {
   "name": "styleselect",
-  "version": "0.0.6",
+  "version": "0.1.0",
   "main": "dist/styleselect.js",
   "devDependencies": {
     "gulp": "3.3.1",
